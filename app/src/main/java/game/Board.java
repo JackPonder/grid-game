@@ -4,25 +4,19 @@ import java.util.Random;
 import java.util.Arrays;
 
 public class Board {
-    private String[][] board;
+    private Character[][] boardData;
+    private static final char[] pieces = {'Q', 'W', 'X', 'Y', 'Z'};
 
     public Board() {
-        this.board = new String[8][8];
-        Random rand = new Random();
-        String[] letters = {"Q", "W", "X", "Y", "Z"};
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board[i].length; j++) {
-                board[i][j] = letters[rand.nextInt(letters.length)];
-            }
-        }
+        this.boardData = new Character[8][8];
+        this.fillEmptySpaces();
     }
 
     @Override
     public String toString() {
-        String buffer = String.format("\n%s+\n", new String("+---").repeat(board[0].length));
-        String output = Arrays.deepToString(board);
-        output = output.substring(1, output.length() - 1);
-        output = output.replace("], ", "]").replace(", ", " | ");
+        String buffer = String.format("\n%s+\n", new String("+---").repeat(boardData[0].length));
+        String output = Arrays.deepToString(boardData);
+        output = output.substring(1, output.length() - 1).replace("], ", "]").replace(", ", " | ");
         return output.replace("[", buffer + "| ").replace("]", " |") + buffer;
     }
 
@@ -44,35 +38,50 @@ public class Board {
     public void movePieces(String move) {
         if (!isValidMove(move)) return;
 
-        int x = Character.getNumericValue(move.charAt(0)) - 10;
-        int y = Character.getNumericValue(move.charAt(1)) - 1;
-        String temp = "";
+        int row = Character.getNumericValue(move.charAt(0)) - 10;
+        int col = Character.getNumericValue(move.charAt(1)) - 1;
+        Character temp = null;
         switch (move.charAt(2)) {
             case 'u':
-                temp = board[x - 1][y];
-                board[x - 1][y] = board[x][y];
+                temp = boardData[row - 1][col];
+                boardData[row - 1][col] = boardData[row][col];
                 break;
             case 'd':
-                temp = board[x + 1][y];
-                board[x + 1][y] = board[x][y];
+                temp = boardData[row + 1][col];
+                boardData[row + 1][col] = boardData[row][col];
                 break;
             case 'l':
-                temp = board[x][y - 1];
-                board[x][y - 1] = board[x][y];
+                temp = boardData[row][col - 1];
+                boardData[row][col - 1] = boardData[row][col];
                 break;
             case 'r':
-                temp = board[x][y + 1];
-                board[x][y + 1] = board[x][y];
+                temp = boardData[row][col + 1];
+                boardData[row][col + 1] = boardData[row][col];
                 break;
         }
-        board[x][y] = temp;
+        boardData[row][col] = temp;
     }
 
-    public void removePiece() {
+    public void findMatches() {
         
+    }
+
+    public void removePiece(int row, int col) {
+        boardData[row][col] = null;
     }
 
     public void dropPieces() {
 
+    }
+
+    public void fillEmptySpaces() {
+        Random rand = new Random();
+        for (int i = 0; i < boardData.length; i++) {
+            for (int j = 0; j < boardData[i].length; j++) {
+                if (boardData[i][j] == null) {
+                    boardData[i][j] = pieces[rand.nextInt(pieces.length)];
+                }
+            }
+        }
     }
 }
