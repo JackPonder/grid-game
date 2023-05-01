@@ -2,14 +2,34 @@ package game;
 
 import java.util.Random;
 import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Board {
     private Character[][] boardData;
-    private static final char[] pieces = {'Q', 'W', 'X', 'Y', 'Z'};
+    private char[] pieces;
+    private Character empty;
 
     public Board() {
         this.boardData = new Character[8][8];
-        this.fillEmptySpaces();
+        this.pieces = new char[] {'Q', 'W', 'X', 'Y', 'Z'};
+        this.empty = ' ';
+
+        Random random = new Random();
+        for (int row = 0; row < boardData.length; row++) {
+            for (int col = 0; col < boardData[row].length; col++) {
+                boardData[row][col] = pieces[random.nextInt(pieces.length)];
+            }
+        }
+    }
+
+    public class Position {
+        public final int row, col;
+
+        public Position(int row, int col) {
+            this.row = row;
+            this.col = col;
+        }
     }
 
     @Override
@@ -40,7 +60,7 @@ public class Board {
 
         int row = Character.getNumericValue(move.charAt(0)) - 10;
         int col = Character.getNumericValue(move.charAt(1)) - 1;
-        Character temp = null;
+        char temp = empty;
         switch (move.charAt(2)) {
             case 'u':
                 temp = boardData[row - 1][col];
@@ -62,26 +82,66 @@ public class Board {
         boardData[row][col] = temp;
     }
 
-    public void findMatches() {
-        
-    }
+    public Position[] findMatches() {
+        Position[][] possibleMatches = {
+            {new Position(0, 0), new Position(1, 0), new Position(2, 0)},
+            {new Position(0, 0), new Position(0, 1), new Position(0, 2)},
+        };
 
-    public void removePiece(int row, int col) {
-        boardData[row][col] = null;
-    }
+        List<Position> matches = new ArrayList<>();
+        for (int row = 0; row < boardData.length; row++) {
+            for (int col = 0; col < boardData[row].length; col++) {
+                for (Position[] positions : possibleMatches) {
+                    boolean foundMatch = true;
+                    for (Position pos : positions) {
+                        try {
+                            if (boardData[row][col] != boardData[row + pos.row][col + pos.col]) {
+                                foundMatch = false;
+                                break;
+                            }
+                        } catch (IndexOutOfBoundsException e) {
+                            foundMatch = false;
+                        }
+                    }
+                    if (foundMatch) {
+                        for (Position pos : positions) {
+                            matches.add(new Position(row + pos.row, col + pos.col));
+                        }
+                    }
 
-    public void dropPieces() {
-
-    }
-
-    public void fillEmptySpaces() {
-        Random rand = new Random();
-        for (int i = 0; i < boardData.length; i++) {
-            for (int j = 0; j < boardData[i].length; j++) {
-                if (boardData[i][j] == null) {
-                    boardData[i][j] = pieces[rand.nextInt(pieces.length)];
                 }
             }
         }
+        return matches.toArray(new Position[0]);
+    }
+
+    public void removePiece(int row, int col) {
+        boardData[row][col] = empty;
+    }
+
+    public void dropPieces() {
+        for (int row = boardData.length - 1; row > 0; row--) {
+            for (int col = 0; col < boardData[row].length; col++) {
+                if (boardData[row][col].equals(empty)) {
+                    boardData[row][col] = boardData[row - 1][col];
+                    boardData[row - 1][col] = empty;
+                }
+            }
+        }
+        Random random = new Random();
+        for (int col = 0; col < boardData[0].length; col++) {
+            if (boardData[0][col].equals(empty)) {
+                boardData[0][col] = pieces[random.nextInt(pieces.length)];
+            }
+        }
+    }
+
+    public boolean containsEmptySpaces() {
+        for (int row = 0; row < boardData.length; row++) {
+            for (int col = 0; col < boardData[row].length; col++) {
+                if (boardData[row][col].equals(empty)) return true;
+            }
+        }
+        return false;
     }
 }
