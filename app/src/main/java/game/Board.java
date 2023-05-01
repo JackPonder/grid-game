@@ -6,12 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Board {
-    private Character[][] boardData;
+    private char[][] boardData;
     private char[] pieces;
-    private Character empty;
+    private char empty;
 
     public Board() {
-        this.boardData = new Character[8][8];
+        this.boardData = new char[8][8];
         this.pieces = new char[] {'Q', 'W', 'X', 'Y', 'Z'};
         this.empty = ' ';
 
@@ -44,6 +44,7 @@ public class Board {
         if (move.length() != 3) {
             return false;
         }
+
         move = move.toLowerCase();
         if (!Arrays.asList('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h').contains(move.charAt(0))) {
             return false;
@@ -52,6 +53,17 @@ public class Board {
         } if (!Arrays.asList('u', 'd', 'l', 'r').contains(move.charAt(2))) {
             return false;
         }
+
+        if (move.charAt(0) == 'a' && move.charAt(2) == 'u') {
+            return false;
+        } if (move.charAt(0) == 'h' && move.charAt(2) == 'd') {
+            return false;
+        } if (move.charAt(1) == '1' && move.charAt(2) == 'l') {
+            return false;
+        } if (move.charAt(1) == '8' && move.charAt(2) == 'r') {
+            return false;
+        }
+
         return true;
     }
 
@@ -122,7 +134,7 @@ public class Board {
     public void dropPieces() {
         for (int row = boardData.length - 1; row > 0; row--) {
             for (int col = 0; col < boardData[row].length; col++) {
-                if (boardData[row][col].equals(empty)) {
+                if (boardData[row][col] == empty) {
                     boardData[row][col] = boardData[row - 1][col];
                     boardData[row - 1][col] = empty;
                 }
@@ -130,7 +142,7 @@ public class Board {
         }
         Random random = new Random();
         for (int col = 0; col < boardData[0].length; col++) {
-            if (boardData[0][col].equals(empty)) {
+            if (boardData[0][col] == empty) {
                 boardData[0][col] = pieces[random.nextInt(pieces.length)];
             }
         }
@@ -139,7 +151,7 @@ public class Board {
     public boolean containsEmptySpaces() {
         for (int row = 0; row < boardData.length; row++) {
             for (int col = 0; col < boardData[row].length; col++) {
-                if (boardData[row][col].equals(empty)) return true;
+                if (boardData[row][col] == empty) return true;
             }
         }
         return false;
