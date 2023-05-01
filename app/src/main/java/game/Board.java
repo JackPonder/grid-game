@@ -12,7 +12,7 @@ public class Board {
 
     public Board() {
         this.boardData = new char[8][8];
-        this.pieces = new char[] {'Q', 'W', 'X', 'Y', 'Z'};
+        this.pieces = new char[] {'Q', 'R', 'S', 'X', 'Y', 'Z'};
         this.empty = ' ';
 
         Random random = new Random();
@@ -20,6 +20,13 @@ public class Board {
             for (int col = 0; col < boardData[row].length; col++) {
                 boardData[row][col] = pieces[random.nextInt(pieces.length)];
             }
+        }
+
+        Position[] matches;
+        while ((matches = findMatches()).length != 0) {
+            for (Position pos : matches) {
+                boardData[pos.row][pos.col] = pieces[random.nextInt(pieces.length)];
+            }           
         }
     }
 

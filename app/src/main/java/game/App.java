@@ -8,13 +8,12 @@ public class App {
     public static void main(String[] args) {
         Board board = new Board();
         int score = 0;
+        updateDisplay(board, score);
         while (true) {
-            updateDisplay(board, score);
-
             String move;
             do {
                 System.out.print("Enter move: ");
-                move = App.scan.nextLine();
+                move = scan.nextLine();
                 if (!board.isValidMove(move)) {
                     System.out.println("Invalid move");
                 }
@@ -24,18 +23,22 @@ public class App {
             updateDisplay(board, score);
             sleep(0.5);
 
-            for (Board.Position pos : board.findMatches()) {
-                score += 100;
-                board.removePiece(pos.row, pos.col);
-            }
-            updateDisplay(board, score);
-            sleep(0.5);
-
-            while (board.containsEmptySpaces()) {
-                board.dropPieces();
+            Board.Position[] matches;
+            while ((matches = board.findMatches()).length != 0) {
+                for (Board.Position pos : matches) {
+                    score += 100;
+                    board.removePiece(pos.row, pos.col);
+                }
                 updateDisplay(board, score);
                 sleep(0.5);
+
+                while (board.containsEmptySpaces()) {
+                    board.dropPieces();
+                    updateDisplay(board, score);
+                    sleep(0.5);
+                }                
             }
+
         }
     }
 
