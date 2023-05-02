@@ -6,7 +6,7 @@ public class App {
     private static final Scanner scan = new Scanner(System.in);
 
     public static void main(String[] args) {
-        Board board = new Board();
+        Board board = new Board(8, 10);
         int score = 0;
         updateDisplay(board, score);
         while (true) {

@@ -3,15 +3,15 @@ package game;
 import java.util.Random;
 import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedList;
 
 public class Board {
     private char[][] boardData;
     private char[] pieces;
     private char empty;
 
-    public Board() {
-        this.boardData = new char[8][8];
+    public Board(int height, int width) {
+        this.boardData = new char[height][width];
         this.pieces = new char[] {'Q', 'R', 'S', 'X', 'Y', 'Z'};
         this.empty = ' ';
 
@@ -21,7 +21,6 @@ public class Board {
                 boardData[row][col] = pieces[random.nextInt(pieces.length)];
             }
         }
-
         Position[] matches;
         while ((matches = findMatches()).length != 0) {
             for (Position pos : matches) {
@@ -42,9 +41,20 @@ public class Board {
     @Override
     public String toString() {
         String buffer = String.format("\n%s+\n", new String("+---").repeat(boardData[0].length));
-        String output = Arrays.deepToString(boardData);
-        output = output.substring(1, output.length() - 1).replace("], ", "]").replace(", ", " | ");
-        return output.replace("[", buffer + "| ").replace("]", " |") + buffer;
+        StringBuilder output = new StringBuilder(buffer);
+        for (int row = 0; row < boardData.length; row++) {
+            char rowLabel = (char) ('1' + row);
+            for (int col = 0; col < boardData[row].length; col++) {
+                output.append(String.format("| %s ", boardData[row][col]));
+            }
+            output.append(String.format("| %s%s", rowLabel, buffer));
+        }
+        for (int col = 0; col < boardData[0].length; col++) {
+            char colLabel = (char) ('A' + col);
+            output.append(String.format("  %s ", colLabel));
+        }
+        output.append("\n");
+        return output.toString();
     }
 
     public boolean isValidMove(String move) {
@@ -53,21 +63,29 @@ public class Board {
         }
 
         move = move.toLowerCase();
-        if (!Arrays.asList('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h').contains(move.charAt(0))) {
+        LinkedList<Character> validRows = new LinkedList<>(), validCols = new LinkedList<>();
+        for (int row = 0; row < boardData.length; row++) {
+            validRows.add((char)('1' + row));
+        }
+        for (int col = 0; col < boardData[0].length; col++) {
+            validCols.add((char)('a' + col));
+        }
+
+        if (!validCols.contains(move.charAt(0))) {
             return false;
-        } if (!Arrays.asList('1', '2', '3', '4', '5', '6', '7', '8').contains(move.charAt(1))) {
+        } if (!validRows.contains(move.charAt(1))) {
             return false;
         } if (!Arrays.asList('u', 'd', 'l', 'r').contains(move.charAt(2))) {
             return false;
         }
 
-        if (move.charAt(0) == 'a' && move.charAt(2) == 'u') {
+        if (validCols.getFirst().equals(move.charAt(0)) && move.charAt(2) == 'l') {
             return false;
-        } if (move.charAt(0) == 'h' && move.charAt(2) == 'd') {
+        } if (validCols.getLast().equals(move.charAt(0)) && move.charAt(2) == 'r') {
             return false;
-        } if (move.charAt(1) == '1' && move.charAt(2) == 'l') {
+        } if (validRows.getFirst().equals(move.charAt(1)) && move.charAt(2) == 'u') {
             return false;
-        } if (move.charAt(1) == '8' && move.charAt(2) == 'r') {
+        } if (validRows.getLast().equals(move.charAt(1)) && move.charAt(2) == 'd') {
             return false;
         }
 
@@ -75,10 +93,8 @@ public class Board {
     }
 
     public void movePieces(String move) {
-        if (!isValidMove(move)) return;
-
-        int row = Character.getNumericValue(move.charAt(0)) - 10;
-        int col = Character.getNumericValue(move.charAt(1)) - 1;
+        int col = Character.getNumericValue(move.charAt(0)) - 10;
+        int row = Character.getNumericValue(move.charAt(1)) - 1;
         char temp = empty;
         switch (move.charAt(2)) {
             case 'u':
@@ -107,7 +123,7 @@ public class Board {
             {new Position(0, 0), new Position(0, 1), new Position(0, 2)},
         };
 
-        List<Position> matches = new ArrayList<>();
+        ArrayList<Position> matches = new ArrayList<>();
         for (int row = 0; row < boardData.length; row++) {
             for (int col = 0; col < boardData[row].length; col++) {
                 for (Position[] positions : possibleMatches) {
