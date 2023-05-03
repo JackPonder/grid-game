@@ -6,25 +6,25 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class Board {
-    private char[][] boardData;
+    private char[][] board;
     private char[] pieces;
     private char empty;
 
     public Board(int height, int width) {
-        this.boardData = new char[height][width];
+        this.board = new char[height][width];
         this.pieces = new char[] {'Q', 'R', 'S', 'X', 'Y', 'Z'};
         this.empty = ' ';
 
         Random random = new Random();
-        for (int row = 0; row < boardData.length; row++) {
-            for (int col = 0; col < boardData[row].length; col++) {
-                boardData[row][col] = pieces[random.nextInt(pieces.length)];
+        for (int row = 0; row < board.length; row++) {
+            for (int col = 0; col < board[row].length; col++) {
+                board[row][col] = pieces[random.nextInt(pieces.length)];
             }
         }
         Position[] matches;
         while ((matches = findMatches()).length != 0) {
             for (Position pos : matches) {
-                boardData[pos.row][pos.col] = pieces[random.nextInt(pieces.length)];
+                board[pos.row][pos.col] = pieces[random.nextInt(pieces.length)];
             }           
         }
     }
@@ -40,16 +40,16 @@ public class Board {
 
     @Override
     public String toString() {
-        String buffer = String.format("\n%s+\n", new String("+---").repeat(boardData[0].length));
+        String buffer = String.format("\n%s+\n", new String("+---").repeat(board[0].length));
         StringBuilder output = new StringBuilder(buffer);
-        for (int row = 0; row < boardData.length; row++) {
+        for (int row = 0; row < board.length; row++) {
             char rowLabel = (char) ('1' + row);
-            for (int col = 0; col < boardData[row].length; col++) {
-                output.append(String.format("| %s ", boardData[row][col]));
+            for (int col = 0; col < board[row].length; col++) {
+                output.append(String.format("| %s ", board[row][col]));
             }
             output.append(String.format("| %s%s", rowLabel, buffer));
         }
-        for (int col = 0; col < boardData[0].length; col++) {
+        for (int col = 0; col < board[0].length; col++) {
             char colLabel = (char) ('A' + col);
             output.append(String.format("  %s ", colLabel));
         }
@@ -64,10 +64,10 @@ public class Board {
 
         move = move.toLowerCase();
         LinkedList<Character> validRows = new LinkedList<>(), validCols = new LinkedList<>();
-        for (int row = 0; row < boardData.length; row++) {
+        for (int row = 0; row < board.length; row++) {
             validRows.add((char)('1' + row));
         }
-        for (int col = 0; col < boardData[0].length; col++) {
+        for (int col = 0; col < board[0].length; col++) {
             validCols.add((char)('a' + col));
         }
 
@@ -98,23 +98,23 @@ public class Board {
         char temp = empty;
         switch (move.charAt(2)) {
             case 'u':
-                temp = boardData[row - 1][col];
-                boardData[row - 1][col] = boardData[row][col];
+                temp = board[row - 1][col];
+                board[row - 1][col] = board[row][col];
                 break;
             case 'd':
-                temp = boardData[row + 1][col];
-                boardData[row + 1][col] = boardData[row][col];
+                temp = board[row + 1][col];
+                board[row + 1][col] = board[row][col];
                 break;
             case 'l':
-                temp = boardData[row][col - 1];
-                boardData[row][col - 1] = boardData[row][col];
+                temp = board[row][col - 1];
+                board[row][col - 1] = board[row][col];
                 break;
             case 'r':
-                temp = boardData[row][col + 1];
-                boardData[row][col + 1] = boardData[row][col];
+                temp = board[row][col + 1];
+                board[row][col + 1] = board[row][col];
                 break;
         }
-        boardData[row][col] = temp;
+        board[row][col] = temp;
     }
 
     public Position[] findMatches() {
@@ -124,26 +124,15 @@ public class Board {
         };
 
         ArrayList<Position> matches = new ArrayList<>();
-        for (int row = 0; row < boardData.length; row++) {
-            for (int col = 0; col < boardData[row].length; col++) {
+        for (int row = 0; row < board.length; row++) {
+            for (int col = 0; col < board[row].length; col++) {
+                final int r = row, c = col;
                 for (Position[] positions : possibleMatches) {
-                    boolean foundMatch = true;
-                    for (Position pos : positions) {
-                        try {
-                            if (boardData[row][col] != boardData[row + pos.row][col + pos.col]) {
-                                foundMatch = false;
-                                break;
-                            }
-                        } catch (IndexOutOfBoundsException e) {
-                            foundMatch = false;
+                    try {
+                        if (Arrays.stream(positions).allMatch(p -> board[r][c] == board[r + p.row][c + p.col])) {
+                            for (Position p : positions) matches.add(new Position(r + p.row, c + p.col));
                         }
-                    }
-                    if (foundMatch) {
-                        for (Position pos : positions) {
-                            matches.add(new Position(row + pos.row, col + pos.col));
-                        }
-                    }
-
+                    } catch (IndexOutOfBoundsException e) {}
                 }
             }
         }
@@ -151,30 +140,29 @@ public class Board {
     }
 
     public void removePiece(int row, int col) {
-        boardData[row][col] = empty;
+        board[row][col] = empty;
     }
 
     public void dropPieces() {
-        for (int row = boardData.length - 1; row > 0; row--) {
-            for (int col = 0; col < boardData[row].length; col++) {
-                if (boardData[row][col] == empty) {
-                    boardData[row][col] = boardData[row - 1][col];
-                    boardData[row - 1][col] = empty;
-                }
+        for (int row = board.length - 1; row > 0; row--) {
+            for (int col = 0; col < board[row].length; col++) {
+                if (board[row][col] != empty) continue;
+                board[row][col] = board[row - 1][col];
+                board[row - 1][col] = empty;    
             }
         }
         Random random = new Random();
-        for (int col = 0; col < boardData[0].length; col++) {
-            if (boardData[0][col] == empty) {
-                boardData[0][col] = pieces[random.nextInt(pieces.length)];
+        for (int col = 0; col < board[0].length; col++) {
+            if (board[0][col] == empty) {
+                board[0][col] = pieces[random.nextInt(pieces.length)];
             }
         }
     }
 
     public boolean containsEmptySpaces() {
-        for (int row = 0; row < boardData.length; row++) {
-            for (int col = 0; col < boardData[row].length; col++) {
-                if (boardData[row][col] == empty) return true;
+        for (int row = 0; row < board.length; row++) {
+            for (int col = 0; col < board[row].length; col++) {
+                if (board[row][col] == empty) return true;
             }
         }
         return false;

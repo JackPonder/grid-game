@@ -38,7 +38,6 @@ public class App {
                     sleep(0.5);
                 }                
             }
-
         }
     }
 
@@ -52,8 +51,6 @@ public class App {
     public static void sleep(double seconds) {
         try {
             Thread.sleep((long)(seconds * 1000));
-        } catch (InterruptedException e) {
-            
-        }
+        } catch (InterruptedException e) {}
     }
 }
