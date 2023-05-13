@@ -23,9 +23,9 @@ public class App {
             updateDisplay(board, score);
             sleep(0.5);
 
-            Board.Position[] matches;
+            Position[] matches;
             while ((matches = board.findMatches()).length != 0) {
-                for (Board.Position pos : matches) {
+                for (Position pos : matches) {
                     score += 100;
                     board.removePiece(pos.row, pos.col);
                 }

@@ -1,48 +1,26 @@
 package game;
 
-import java.util.Random;
 import java.util.function.Predicate;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class Board {
-    private String[][] board;
-    private String[] pieces;
-    private String empty;
+    private Piece[][] board;
 
     public Board(int height, int width) {
-        this.board = new String[height][width];
-        this.pieces = new String[] {
-            "\033[91mQ\033[0m",
-            "\033[33mR\033[0m", 
-            "\033[92mS\033[0m", 
-            "\033[96mX\033[0m", 
-            "\033[94mY\033[0m", 
-            "\033[35mZ\033[0m",
-        };
-        this.empty = " ";
+        this.board = new Piece[height][width];
 
-        Random random = new Random();
         for (int row = 0; row < board.length; row++) {
             for (int col = 0; col < board[row].length; col++) {
-                board[row][col] = pieces[random.nextInt(pieces.length)];
+                board[row][col] = Piece.getRandom();
             }
         }
         Position[] matches;
         while ((matches = findMatches()).length != 0) {
             for (Position pos : matches) {
-                board[pos.row][pos.col] = pieces[random.nextInt(pieces.length)];
+                board[pos.row][pos.col] = Piece.getRandom();
             }           
-        }
-    }
-
-    public class Position {
-        public final int row, col;
-
-        public Position(int row, int col) {
-            this.row = row;
-            this.col = col;
         }
     }
 
@@ -103,7 +81,7 @@ public class Board {
     public void movePieces(String move) {
         int col = Character.getNumericValue(move.charAt(0)) - 10;
         int row = Character.getNumericValue(move.charAt(1)) - 1;
-        String temp = empty;
+        Piece temp = Piece.EMPTY;
         switch (move.charAt(2)) {
             case 'u':
                 temp = board[row - 1][col];
@@ -148,22 +126,21 @@ public class Board {
     }
 
     public void removePiece(int row, int col) {
-        board[row][col] = empty;
+        board[row][col] = Piece.EMPTY;
     }
 
     public void dropPieces() {
         for (int row = board.length - 1; row > 0; row--) {
             for (int col = 0; col < board[row].length; col++) {
-                if (board[row][col].equals(empty)) {
+                if (board[row][col].equals(Piece.EMPTY)) {
                     board[row][col] = board[row - 1][col];
-                    board[row - 1][col] = empty;                        
+                    board[row - 1][col] = Piece.EMPTY;                        
                 }
             }
         }
-        Random random = new Random();
         for (int col = 0; col < board[0].length; col++) {
-            if (board[0][col].equals(empty)) {
-                board[0][col] = pieces[random.nextInt(pieces.length)];
+            if (board[0][col].equals(Piece.EMPTY)) {
+                board[0][col] = Piece.getRandom();
             }
         }
     }
@@ -171,7 +148,7 @@ public class Board {
     public boolean containsEmptySpaces() {
         for (int row = 0; row < board.length; row++) {
             for (int col = 0; col < board[row].length; col++) {
-                if (board[row][col].equals(empty)) return true;
+                if (board[row][col].equals(Piece.EMPTY)) return true;
             }
         }
         return false;
